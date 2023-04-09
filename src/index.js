@@ -12,8 +12,6 @@ const lightbox = new SimpleLightbox('.gallery a');
 
 let searchValue = '';
 let pageCounter = 0;
-let markup;
-let quantityImage = 0;
 
 loadMoreButtonEl.classList.add('hidden');
 searchButtonEl.addEventListener('click', handleClickSearchButton);
@@ -34,17 +32,11 @@ function handleClickSearchButton(e) {
           'Sorry, there are no images matching your search query. Please try again.'
         );
       }
-
       searchInputEl.value = '';
       loadMoreButtonEl.classList.add('hidden');
       Notify.info(`Hooray! We found ${data.totalHits} images.`);
-
-      markup = createMarkup(data);
-
-      galleryListEl.insertAdjacentHTML('beforeend', markup);
-      lightbox.refresh();
-      quantityImage = data.totalHits;
-      if (quantityImage >= 40) {
+      renderMarkup(data);
+      if (data.totalHits >= 40) {
         loadMoreButtonEl.classList.remove('hidden');
       }
     })
@@ -55,11 +47,8 @@ function handleClickLoadMoreButton() {
   pageCounter += 1;
   fetchData(searchValue, pageCounter)
     .then(data => {
-      markup = createMarkup(data);
-      console.log(pageCounter);
-      galleryListEl.insertAdjacentHTML('beforeend', markup);
-      lightbox.refresh();
-      if (quantityImage / pageCounter <= 40) {
+      renderMarkup(data);
+      if (data.totalHits / pageCounter <= 40) {
         loadMoreButtonEl.classList.add('hidden');
         pageCounter = 0;
         Notify.failure(
@@ -67,6 +56,11 @@ function handleClickLoadMoreButton() {
         );
       }
     })
-
     .catch(error => console.log(error));
+}
+
+function renderMarkup(array) {
+  const markup = createMarkup(array);
+  galleryListEl.insertAdjacentHTML('beforeend', markup);
+  lightbox.refresh();
 }
